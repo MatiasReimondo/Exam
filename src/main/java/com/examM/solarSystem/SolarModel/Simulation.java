@@ -8,11 +8,12 @@ import java.util.Map;
 public class Simulation {
 
     private List<Planet> solar_system = new LinkedList<Planet>();
-    private Map<Integer ,Period> days = new HashMap<Integer, Period>();
+    private Map<Long ,PeriodPrediction> days = new HashMap<Long, PeriodPrediction>();
 
     private Integer counter_rain;
     private Integer counter_drought;
     private Integer counter_optimal;
+    private long day_max_rain;
 
 
     public Simulation(){
@@ -26,7 +27,8 @@ public class Simulation {
     }
 
     public void simulate_x_days(int days){
-        for (int day = 0; day < days; day++) {
+        double perimeter_max = 0;
+        for (long day = 1; day <= days; day++) {
             for(Planet planet: solar_system){
                 planet.move();
             }
@@ -36,20 +38,27 @@ public class Simulation {
 
             if(observ.are_planets_alinged()){
                 if(observ.is_sun_alinged()){
-                    this.days.put(day+1,Period.DROUGHT);
+                    this.days.put(day,new PeriodPrediction(day,Period.DROUGHT));
                     this.counter_drought++;
                 }else{
-                    this.days.put(day+1,Period.OPTIMAL);
+                    this.days.put(day,new PeriodPrediction(day,Period.OPTIMAL));
                     this.counter_optimal++;
                 }
             }
             else if(observ.contains_sun()){
-                this.days.put(day+1,Period.RAIN);
+                this.days.put(day,new PeriodPrediction(day,Period.RAIN));
                 this.counter_rain++;
+                if(perimeter_max < observ.getTriangle_perimeter()){
+                    perimeter_max = observ.getTriangle_perimeter();
+                    this.day_max_rain = day;
+                }
             }else {
-                this.days.put(day+1,Period.NO_IMPORTANT);
+                this.days.put(day+1,new PeriodPrediction(day,Period.NO_IMPORTANT));
             }
         }
+        this.getDays().remove(day_max_rain);
+        this.getDays().put(day_max_rain,new PeriodPrediction(day_max_rain,Period.RAIN_MAX));
+
     }
 
     public Integer getCounter_rain() {
@@ -72,7 +81,19 @@ public class Simulation {
         return counter_optimal;
     }
 
-    public void setCounter_optimal(Integer counter_optimal) {
-        this.counter_optimal = counter_optimal;
+    public Map<Long, PeriodPrediction> getDays() {
+        return days;
+    }
+
+    public void setDays(Map<Long, PeriodPrediction> days) {
+        this.days = days;
+    }
+
+    public long getDay_max_rain() {
+        return day_max_rain;
+    }
+
+    public void setDay_max_rain(long day_max_rain) {
+        this.day_max_rain = day_max_rain;
     }
 }
