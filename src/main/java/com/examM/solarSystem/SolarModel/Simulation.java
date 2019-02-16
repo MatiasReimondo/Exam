@@ -53,9 +53,12 @@ public class Simulation {
                     this.day_max_rain = day;
                 }
             }else {
-                this.days.put(day+1,new PeriodPrediction(day+1,Period.NO_IMPORTANT));
+                this.days.put(day+1,new PeriodPrediction(day,Period.NO_IMPORTANT));
             }
         }
+        this.getDays().remove(day_max_rain);
+        this.getDays().put(day_max_rain,new PeriodPrediction(day_max_rain,Period.RAIN_MAX));
+
     }
 
     public Integer getCounter_rain() {
