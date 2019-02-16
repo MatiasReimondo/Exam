@@ -13,6 +13,7 @@ public class Simulation {
     private Integer counter_rain;
     private Integer counter_drought;
     private Integer counter_optimal;
+    private long day_max_rain;
 
 
     public Simulation(){
@@ -26,7 +27,8 @@ public class Simulation {
     }
 
     public void simulate_x_days(int days){
-        for (long day = 0; day < days; day++) {
+        double perimeter_max = 0;
+        for (long day = 1; day <= days; day++) {
             for(Planet planet: solar_system){
                 planet.move();
             }
@@ -36,16 +38,20 @@ public class Simulation {
 
             if(observ.are_planets_alinged()){
                 if(observ.is_sun_alinged()){
-                    this.days.put(day+1,new PeriodPrediction(day+1,Period.DROUGHT));
+                    this.days.put(day,new PeriodPrediction(day,Period.DROUGHT));
                     this.counter_drought++;
                 }else{
-                    this.days.put(day+1,new PeriodPrediction(day+1,Period.OPTIMAL));
+                    this.days.put(day,new PeriodPrediction(day,Period.OPTIMAL));
                     this.counter_optimal++;
                 }
             }
             else if(observ.contains_sun()){
-                this.days.put(day+1,new PeriodPrediction(day+1,Period.RAIN));
+                this.days.put(day,new PeriodPrediction(day,Period.RAIN));
                 this.counter_rain++;
+                if(perimeter_max < observ.getTriangle_perimeter()){
+                    perimeter_max = observ.getTriangle_perimeter();
+                    this.day_max_rain = day;
+                }
             }else {
                 this.days.put(day+1,new PeriodPrediction(day+1,Period.NO_IMPORTANT));
             }
@@ -78,5 +84,13 @@ public class Simulation {
 
     public void setDays(Map<Long, PeriodPrediction> days) {
         this.days = days;
+    }
+
+    public long getDay_max_rain() {
+        return day_max_rain;
+    }
+
+    public void setDay_max_rain(long day_max_rain) {
+        this.day_max_rain = day_max_rain;
     }
 }

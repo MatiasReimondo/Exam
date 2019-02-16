@@ -101,4 +101,12 @@ public class Observation {
     public double getTriangle_area() {
         return triangle_area;
     }
+
+    public double getTriangle_perimeter() {
+        return triangle_perimeter;
+    }
+
+    public void setTriangle_perimeter(double triangle_perimeter) {
+        this.triangle_perimeter = triangle_perimeter;
+    }
 }

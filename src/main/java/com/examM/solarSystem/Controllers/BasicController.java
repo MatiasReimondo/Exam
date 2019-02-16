@@ -15,7 +15,7 @@ public class BasicController {
 
     @RequestMapping("/")
     public ResponsePrediction predictioResult(){
-        return new ResponsePrediction(simulation.getCounter_rain(),simulation.getCounter_drought(),simulation.getCounter_optimal());
+        return new ResponsePrediction(simulation.getCounter_rain(),simulation.getCounter_drought(),simulation.getCounter_optimal(), simulation.getDay_max_rain());
     }
 
     @RequestMapping(value ="/clima", method = RequestMethod.GET)
