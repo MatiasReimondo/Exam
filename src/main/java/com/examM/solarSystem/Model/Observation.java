@@ -8,31 +8,43 @@ public class Observation {
     private Planet p2;
     private Planet p3;
 
-    private static Point location_s = new Point(0,0);
+    private static Point sun = new Point(0,0);
 
-    private boolean contains_sun;
-
-    private double perimeter;
-
-    private double angleSegments;
 
     public Observation(Planet p1, Planet p2, Planet p3) {
         this.p1 = p1;
         this.p2 = p2;
         this.p3 = p3;
-
-        process_information();
-
     }
 
-    private void process_information(){
-        this.perimeter = perimeter();
-        this.contains_sun = contains_sun();
-        this.angleSegments = angleBetweenSegments();
-
+    public Observation (Observation observation){
+        this.p1 = observation.p1;
+        this.p2 = observation.p2;
+        this.p3 = observation.p3;
     }
 
-    private double perimeter(){
+    public boolean alined_with_sun(double error){
+
+        double dst_sun_p1 = distance(sun,p1);
+        double dst_sun_p2 = distance(sun,p2);
+        double dst_sun_p3 = distance(sun,p3);
+
+        double dst_p1_p2 = distance(p1,p2);
+        double dst_p2_p3 = distance(p2,p3);
+        double dst_p1_p3 = distance(p1,p3);
+
+        double coef1 =Math.abs(dst_sun_p2 -(dst_sun_p1+dst_p1_p2));
+        double coef2 = Math.abs(dst_sun_p3 -(dst_sun_p2+dst_p2_p3));
+        double coef3 = Math.abs(dst_sun_p3 -(dst_sun_p1+dst_p1_p3));
+
+        if(coef1 <error && coef2<error && coef3 <error){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public double perimeter(){
 
         double distance1 = distance(p1,p2);
         double distance2 = distance(p2,p3);
@@ -43,7 +55,7 @@ public class Observation {
         return perimeter;
     }
 
-    public double distance(Point p1, Point p2){
+    private double distance(Point p1, Point p2){
 
         double distance = (Math.sqrt(Math.pow(p1.getCoordinate_x()-p2.getCoordinate_x(),2)
                           + Math.pow(p1.getCoordinate_y()-p2.getCoordinate_y(),2)));
@@ -51,13 +63,13 @@ public class Observation {
     }
 
 
-    private boolean contains_sun (){
+    public boolean contains_sun (){
         Polygon triangle = new Polygon();
         triangle.addPoint((int)p1.getCoordinate_x(),(int)p1.getCoordinate_y());
         triangle.addPoint((int)p2.getCoordinate_x(),(int)p2.getCoordinate_y());
         triangle.addPoint((int)p3.getCoordinate_x(),(int)p3.getCoordinate_y());
 
-        return triangle.contains(location_s.getCoordinate_x(),location_s.getCoordinate_y());
+        return triangle.contains(sun.getCoordinate_x(),sun.getCoordinate_y());
     }
 
     //Tomamos como segmento P2->P1 (V->F)
@@ -75,28 +87,27 @@ public class Observation {
         return angle;
     }
 
-
-    public boolean isContains_sun() {
-        return contains_sun;
+    public Planet getP1() {
+        return p1;
     }
 
-    public void setContains_sun(boolean contains_sun) {
-        this.contains_sun = contains_sun;
+    public void setP1(Planet p1) {
+        this.p1 = p1;
     }
 
-    public double getPerimeter() {
-        return perimeter;
+    public Planet getP2() {
+        return p2;
     }
 
-    public void setPerimeter(double perimeter) {
-        this.perimeter = perimeter;
+    public void setP2(Planet p2) {
+        this.p2 = p2;
     }
 
-    public double getAngleSegments() {
-        return angleSegments;
+    public Planet getP3() {
+        return p3;
     }
 
-    public void setAngleSegments(double angleSegments) {
-        this.angleSegments = angleSegments;
+    public void setP3(Planet p3) {
+        this.p3 = p3;
     }
 }

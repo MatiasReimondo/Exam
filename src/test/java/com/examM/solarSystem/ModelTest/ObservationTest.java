@@ -27,6 +27,8 @@ public class ObservationTest {
     public void coherenceWithDiscret(){
         int counterOfAlligmentInObservation = 0;
         int counterOfRain = 0;
+        int dayMaxRain=0;
+        double maxPerimeter = 0;
         for (int i = 0; i <365 ; i++) {
             planet1.forward();
             planet1.roundError();
@@ -35,19 +37,31 @@ public class ObservationTest {
             planet3.forward();
             planet3.roundError();
             Observation obs = new Observation(planet1,planet2,planet3);
-            if(obs.getAngleSegments() == 0 || obs.getAngleSegments() == 180){
+            if(obs.angleBetweenSegments() == 0 || obs.angleBetweenSegments() == 180){
                 counterOfAlligmentInObservation++;
             }
-            if(obs.isContains_sun()){
+            if(obs.contains_sun()){
                 counterOfRain++;
+                if(obs.perimeter()>maxPerimeter){
+                    maxPerimeter= obs.perimeter();
+                    dayMaxRain= i+1;
+                }
             }
+
 
         }
         Assert.assertEquals(3,counterOfAlligmentInObservation);
-        //Hay un desfasaj entre la solucion discreta anterior
+        Assert.assertEquals(307,dayMaxRain);
+        //Hay un desfasaje entre la solucion discreta anterior
         //Viene de castear a int las coordenadas de los planetas
         //Por ahora comentamos esto y aceptamos el error
         //Assert.assertEquals(125,counterOfRain);
+    }
+
+    @Test
+    public void planetsAlinedWithSun(){
+        Observation obs = new Observation(planet1,planet2,planet3);
+        Assert.assertTrue(obs.alined_with_sun(1));
     }
 
 
