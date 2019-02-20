@@ -1,4 +1,4 @@
-package com.examM.solarSystem.SolarModel;
+package com.examM.solarSystem.Model;
 
 public class PeriodPrediction {
 

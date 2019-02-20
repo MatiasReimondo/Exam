@@ -1,4 +1,4 @@
-package com.examM.solarSystem.SolarModel;
+package com.examM.solarSystem.Model;
 
 public class Point {
     private double coordinate_x;

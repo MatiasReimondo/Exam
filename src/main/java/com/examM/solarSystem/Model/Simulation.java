@@ -1,4 +1,4 @@
-package com.examM.solarSystem.SolarModel;
+package com.examM.solarSystem.Model;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,12 +30,14 @@ public class Simulation {
         double perimeter_max = 0;
         for (long day = 1; day <= days; day++) {
             for(Planet planet: solar_system){
-                planet.move();
+                planet.forward();
             }
-            Observation observ = new Observation(solar_system.get(0).getLocation(),
-                                                 solar_system.get(1).getLocation(),
-                                                 solar_system.get(2).getLocation());
+            Observation observ = new Observation(solar_system.get(0),
+                                                 solar_system.get(1),
+                                                 solar_system.get(2));
 
+
+/*
             if(observ.are_planets_alinged()){
                 if(observ.is_sun_alinged()){
                     this.days.put(day,new PeriodPrediction(day,Period.DROUGHT));
@@ -55,6 +57,7 @@ public class Simulation {
             }else {
                 this.days.put(day+1,new PeriodPrediction(day,Period.NO_IMPORTANT));
             }
+            */
         }
         this.getDays().remove(day_max_rain);
         this.getDays().put(day_max_rain,new PeriodPrediction(day_max_rain,Period.RAIN_MAX));

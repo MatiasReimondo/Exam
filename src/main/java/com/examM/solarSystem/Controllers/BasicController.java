@@ -1,9 +1,9 @@
 package com.examM.solarSystem.Controllers;
 
 
-import com.examM.solarSystem.SolarModel.PeriodPrediction;
-import com.examM.solarSystem.SolarModel.ResponsePrediction;
-import com.examM.solarSystem.SolarModel.Simulation;
+import com.examM.solarSystem.Model.PeriodPrediction;
+import com.examM.solarSystem.Model.ResponsePrediction;
+import com.examM.solarSystem.Model.Simulation;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.*;
