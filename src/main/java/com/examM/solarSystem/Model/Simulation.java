@@ -12,7 +12,7 @@ public class Simulation {
 
     private Map<Long ,PeriodPrediction> days_in_cicle = new HashMap<Long, PeriodPrediction>();
 
-    private List<Observation> cicle = new LinkedList<Observation>();
+    private Map<Long,Observation> cicle = new HashMap<Long,Observation>();
 
 
 
@@ -20,14 +20,10 @@ public class Simulation {
     private Integer counter_drought;
     private Integer counter_optimal;
     private long day_max_rain;
+    private double perimeterMax = 0;
 
-    private static double ERROR_ANGLE= 5;
     private static double ERROR_DISTANCE =10;
-    private static double ANGLE_ALINE_ZERO = 0;
-    private static double ANGLE_ALINE_PI = 180;
-    private static double ANGLE_ALINE_MINUS_PI = -180;
-    private static int LMT_ITERATIONS = 10;
-    private static int FACTOR = 10;
+    private static int FACTOR = 16;
 
 
     public Simulation(){
@@ -39,84 +35,96 @@ public class Simulation {
         counter_drought = 0;
         counter_optimal = 0;
 
+        cicle.put((long)0,new Observation(solar_system.get(0),solar_system.get(1),solar_system.get(2)));
+        days_in_cicle.put((long)0,new PeriodPrediction(0,Period.DROUGHT));
+
     }
 
     public void simulateCicle(){
-        for (int i = 0; i <3650 ; i++) {
 
+        for (long i = 1; i <=360 ; i++) {
             Planet p1;
             Planet p2;
             Planet p3;
             for (Planet planet:solar_system) {
-                planet.roundForward();
+                planet.forward();
             }
             p1 = new Planet(solar_system.get(0));
             p2 = new Planet(solar_system.get(1));
             p3 = new Planet(solar_system.get(2));
 
-            cicle.add(i,new Observation(p1,p2,p3));
+            cicle.put(i,new Observation(p1,p2,p3));
 
         }
         predictCicle();
     }
 
     public void predictCicle(){
-        double perimeterMax =0 ;
-        for (long i = 0; i <3650 ; i++) {
-            Observation obs = cicle.get((int)i);
-            if(obs.contains_sun()){
-                counter_rain++;
-                days_in_cicle.put(i+1,new PeriodPrediction(i+1,Period.RAIN));
-                if(obs.perimeter()>perimeterMax){
-                    perimeterMax = obs.perimeter();
-                    day_max_rain = i+1;
-                }
-            }else if(check_aline(obs.angleBetweenSegments())){
-                if(obs.alined_with_sun(ERROR_DISTANCE)){
-                    counter_drought++;
-                    days_in_cicle.put(i+1,new PeriodPrediction(i+1,Period.DROUGHT));
-                }else{
-                    counter_optimal++;
-                    days_in_cicle.put(i+1,new PeriodPrediction(i+1,Period.OPTIMAL));
-                }
-            }else{
-                Observation obs_past = cicle.get((int)i-1);
-                if(Long.signum((long) obs_past.angleBetweenSegments())!= Long.signum((long)obs.angleBetweenSegments())){
-                    alined_during_day(obs,i+1);
-                }else{
-                    days_in_cicle.put(i+1,new PeriodPrediction(i+1,days_in_cicle.get(i).getDetail()));
-                }
+        for (long i = 1; i <=360 ; i++) {
+            if(!discreet_prediction(i)){
+                approximate_prediction(i);
+            }
+            if(!days_in_cicle.containsKey(i)){
+                days_in_cicle.put(i,new PeriodPrediction(i,days_in_cicle.get(i-1).getDetail()));
             }
         }
-        days_in_cicle.remove(day_max_rain);
-        days_in_cicle.put(day_max_rain,new PeriodPrediction(day_max_rain,Period.RAIN_MAX));
-        System.out.println("Prediccion Terminada");
-
+        day_max_rain_cicle();
     }
 
-    private boolean check_aline(double angle){
+    private boolean discreet_prediction(long day){
+        Observation obs = cicle.get(day);
+        boolean prediction_found = false;
 
-        boolean aline_0 = ((ANGLE_ALINE_ZERO-ERROR_ANGLE < angle) && (angle <ANGLE_ALINE_ZERO+ERROR_ANGLE));
-        boolean aline_pi = ((ANGLE_ALINE_PI-ERROR_ANGLE <angle ));
-        boolean aline_minus_pi = ((angle < ANGLE_ALINE_MINUS_PI+ERROR_ANGLE));
-
-        return (aline_0 || aline_pi || aline_minus_pi);
+        if(obs.contains_sun()) {
+            counter_rain++;
+            days_in_cicle.put(day, new PeriodPrediction(day, Period.RAIN));
+            if (obs.perimeter() > perimeterMax) {
+                perimeterMax = obs.perimeter();
+                day_max_rain = day;
+            }
+            prediction_found= true;
+        }else if(obs.check_aline()){
+            if(obs.alined_with_sun(ERROR_DISTANCE)){
+                counter_drought++;
+                days_in_cicle.put(day,new PeriodPrediction(day,Period.DROUGHT));
+                prediction_found= true;
+            }else{
+                counter_optimal++;
+                days_in_cicle.put(day,new PeriodPrediction(day,Period.OPTIMAL));
+                prediction_found= true;
+            }
+        }
+        return prediction_found;
     }
+
+    private void approximate_prediction(long day){
+        Observation obs_past = cicle.get((day-1));
+        Observation obs = cicle.get(day);
+        if(obs_past.angleBetweenSegments()!= 180 && obs_past.angleBetweenSegments() != -180 && obs_past.angleBetweenSegments() != 0){
+            if(changeSign(obs,obs_past)){
+                alined_during_day(obs,day);
+            }
+        }
+    }
+
 
     private void alined_during_day(Observation obs,long day){
         boolean found_aline = false;
         int iterations = 0;
+
         Observation observation = new Observation(obs);
-        while(!found_aline && iterations<LMT_ITERATIONS ){
+
+        while(!found_aline && iterations<FACTOR ){
+
             observation.getP1().rewind(FACTOR);
             observation.getP2().rewind(FACTOR);
             observation.getP3().rewind(FACTOR);
 
-            if(check_aline(observation.angleBetweenSegments())){
+            if(observation.check_aline()){
                 found_aline = true;
                 if(observation.alined_with_sun(ERROR_DISTANCE)){
                     counter_drought++;
-                    days_in_cicle.put(day,new PeriodPrediction(day,Period.OPTIMAL));
+                    days_in_cicle.put(day,new PeriodPrediction(day,Period.DROUGHT));
                 }else{
                     counter_optimal++;
                     days_in_cicle.put(day,new PeriodPrediction(day,Period.OPTIMAL));
@@ -124,9 +132,15 @@ public class Simulation {
             }
             iterations++;
         }
-        if(!found_aline){
-            days_in_cicle.put(day,new PeriodPrediction(day,days_in_cicle.get(day-1).getDetail()));
-        }
+    }
+
+    private void day_max_rain_cicle(){
+        days_in_cicle.remove(day_max_rain);
+        days_in_cicle.put(day_max_rain,new PeriodPrediction(day_max_rain,Period.RAIN_MAX));
+    }
+
+    private boolean changeSign(Observation obs1, Observation obs2){
+        return (Math.signum(obs1.angleBetweenSegments()) != Math.signum(obs2.angleBetweenSegments()));
     }
 
 

@@ -29,35 +29,28 @@ public class Planet extends Point {
         this.name = planet.name;
     }
 
-
-
-
     public void forward(){
         this.angle+= angular_velocity;
+        if(this.angle<360){
+            this.angle+=360;
+        }
+        if(this.angle >360){
+            this.angle-=360;
+        }
         move();
     }
 
     public void rewind(int factor){
-        this.setCoordinate_x(this.getCoordinate_x() - distance_sun * Math.cos(Math.toRadians(angle))/factor);
-        this.setCoordinate_y(this.getCoordinate_y() - distance_sun * Math.sin(Math.toRadians(angle))/factor);
+        double factor_angle = this.angular_velocity/factor;
+        this.angle -= factor_angle;
+        move();
     }
 
     private void move(){
-        this.setCoordinate_x(this.getCoordinate_x() + distance_sun * Math.cos(Math.toRadians(angle)));
-        this.setCoordinate_y(this.getCoordinate_y() + distance_sun * Math.sin(Math.toRadians(angle)));
+
+        this.setCoordinate_x(distance_sun * Math.cos(Math.toRadians(angle)));
+        this.setCoordinate_y(distance_sun * Math.sin(Math.toRadians(angle)));
     }
-
-    public void roundError(){
-        this.setCoordinate_x(Math.round(this.getCoordinate_x()));
-        this.setCoordinate_y(Math.round(this.getCoordinate_y()));
-    }
-
-    public void roundForward(){
-        this.forward();
-        this.roundError();
-    }
-
-
 
 
     public double getAngular_velocity() {

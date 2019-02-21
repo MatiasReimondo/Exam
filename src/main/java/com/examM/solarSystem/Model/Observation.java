@@ -10,6 +10,10 @@ public class Observation {
 
     private static Point sun = new Point(0,0);
 
+    private static double ERROR_ANGLE= 0.5;
+    private static double ANGLE_ALINE_ZERO = 0;
+    private static double ANGLE_ALINE_PI = 180;
+
 
     public Observation(Planet p1, Planet p2, Planet p3) {
         this.p1 = p1;
@@ -18,9 +22,10 @@ public class Observation {
     }
 
     public Observation (Observation observation){
-        this.p1 = observation.p1;
-        this.p2 = observation.p2;
-        this.p3 = observation.p3;
+
+        this.p1 = new Planet(observation.getP1());
+        this.p2 = new Planet(observation.getP2());
+        this.p3 = new Planet(observation.getP3());
     }
 
     public boolean alined_with_sun(double error){
@@ -37,7 +42,7 @@ public class Observation {
         double coef2 = Math.abs(dst_sun_p3 -(dst_sun_p2+dst_p2_p3));
         double coef3 = Math.abs(dst_sun_p3 -(dst_sun_p1+dst_p1_p3));
 
-        if(coef1 <error && coef2<error && coef3 <error){
+        if(coef1 <error || coef2<error || coef3 <error){
             return true;
         }else{
             return false;
@@ -79,12 +84,27 @@ public class Observation {
         Point pi = new Point(p1.getCoordinate_x()-p2.getCoordinate_x(),p1.getCoordinate_y()-p2.getCoordinate_y());
         Point pj = new Point(p3.getCoordinate_x()-p2.getCoordinate_x(),p3.getCoordinate_y()-p2.getCoordinate_y());
 
-        double angle_pi=Math.atan2(pi.getCoordinate_x(),pi.getCoordinate_y());
-        double angle_pj=Math.atan2(pj.getCoordinate_x(),pj.getCoordinate_y());
+        double angle_pi=Math.toDegrees(Math.atan2(pi.getCoordinate_y(),pi.getCoordinate_x()));
+        double angle_pj=Math.toDegrees(Math.atan2(pj.getCoordinate_y(),pj.getCoordinate_x()));
 
-        double angle=Math.toDegrees(angle_pj-angle_pi);
+        double angle=angle_pi-angle_pj;
+        if(angle >180){
+            angle -=360;
+        }
+        if(angle < -180){
+            angle+=360;
+        }
 
         return angle;
+    }
+
+    public boolean check_aline(){
+        double abs_angle = Math.abs(this.angleBetweenSegments());
+
+        boolean aline_0 = (abs_angle < ANGLE_ALINE_ZERO+ERROR_ANGLE);
+        boolean aline_pi = (ANGLE_ALINE_PI-ERROR_ANGLE < abs_angle) ;
+
+        return (aline_0 || aline_pi);
     }
 
     public Planet getP1() {

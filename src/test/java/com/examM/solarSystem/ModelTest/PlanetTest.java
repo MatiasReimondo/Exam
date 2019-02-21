@@ -1,6 +1,7 @@
 package com.examM.solarSystem.ModelTest;
 
 import com.examM.solarSystem.Model.Planet;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,16 +27,12 @@ public class PlanetTest {
             planet2.forward();
             planet3.forward();
         }
-        planet1.roundError();
-        planet2.roundError();
-        planet3.roundError();
-        Assert.assertTrue(planet1.getCoordinate_x() == 500);
-        Assert.assertTrue(planet1.getCoordinate_y() == 0);
-        Assert.assertTrue(planet2.getCoordinate_x() == 1000);
-        Assert.assertTrue(planet2.getCoordinate_y() == 0);
-        Assert.assertTrue(planet3.getCoordinate_x() == 2000);
-        Assert.assertTrue(planet3.getCoordinate_y() == 0);
-
+        Assert.assertEquals(500,planet1.getCoordinate_x(),0.1);
+        Assert.assertEquals(0,planet1.getCoordinate_y(),0.1);
+        Assert.assertEquals(1000,planet2.getCoordinate_x(),0.1);
+        Assert.assertEquals(0,planet2.getCoordinate_y(),0.1);
+        Assert.assertEquals(2000,planet3.getCoordinate_x(),0.1);
+        Assert.assertEquals(0,planet3.getCoordinate_y(),0.1);
     }
 
     @Test
@@ -47,16 +44,12 @@ public class PlanetTest {
         planet2.rewind(1);
         planet3.rewind(1);
 
-        planet1.roundError();
-        planet2.roundError();
-        planet3.roundError();
-
-        Assert.assertTrue(planet1.getCoordinate_x() == 500);
-        Assert.assertTrue(planet1.getCoordinate_y() == 0);
-        Assert.assertTrue(planet2.getCoordinate_x() == 1000);
-        Assert.assertTrue(planet2.getCoordinate_y() == 0);
-        Assert.assertTrue(planet3.getCoordinate_x() == 2000);
-        Assert.assertTrue(planet3.getCoordinate_y() == 0);
+        Assert.assertEquals(500,planet1.getCoordinate_x(),0.1);
+        Assert.assertEquals(0,planet1.getCoordinate_y(),0.1);
+        Assert.assertEquals(1000,planet2.getCoordinate_x(),0.1);
+        Assert.assertEquals(0,planet2.getCoordinate_y(),0.1);
+        Assert.assertEquals(2000,planet3.getCoordinate_x(),0.1);
+        Assert.assertEquals(0,planet3.getCoordinate_y(),0.1);
 
     }
 
@@ -68,27 +61,20 @@ public class PlanetTest {
         planet1.rewind(4);
         planet1.rewind(4);
 
-        //Cancelamos el error
-        planet1.roundError();
-
-
-        Assert.assertTrue(planet1.getCoordinate_x() == 500);
-        Assert.assertTrue(planet1.getCoordinate_y() == 0);
+        Assert.assertEquals(500,planet1.getCoordinate_x(),0.1);
+        Assert.assertEquals(0,planet1.getCoordinate_y(),0.1);
     }
 
     @Test
     public void planet3Forward1Rewind(){
         planet3.forward();
-        planet3.roundError();
 
         double x = planet3.getCoordinate_x();
         double y = planet3.getCoordinate_y();
 
         planet3.forward();
-        planet3.roundError();
 
         planet3.rewind(1);
-        planet3.roundError();
 
         Assert.assertTrue(planet3.getCoordinate_x() == x);
         Assert.assertTrue(planet3.getCoordinate_y() == y);
@@ -98,23 +84,18 @@ public class PlanetTest {
     @Test
     public void planet3Forward3RewindFactor4(){
         planet3.forward();
-        planet3.roundError();
 
         planet3.forward();
-        planet3.roundError();
 
         double x = planet3.getCoordinate_x();
         double y = planet3.getCoordinate_y();
 
         planet3.forward();
-        planet3.roundError();
 
         planet3.rewind(4);
         planet3.rewind(4);
         planet3.rewind(4);
         planet3.rewind(4);
-
-        planet3.roundError();
 
 
         Assert.assertTrue(planet3.getCoordinate_x() == x);
@@ -126,22 +107,75 @@ public class PlanetTest {
     public void planet3Forward10RewindFactor10(){
         for (int i =0; i<10;i++){
             planet3.forward();
-            planet3.roundError();
         }
         double x = planet3.getCoordinate_x();
         double y = planet3.getCoordinate_y();
 
         planet3.forward();
-        planet3.roundError();
 
         for (int j = 0;j<10;j++){
             planet3.rewind(10);
         }
-        planet3.roundError();
+
+        Assert.assertEquals(x,planet3.getCoordinate_x(),0.1);
+        Assert.assertEquals(y,planet3.getCoordinate_y(),0.1);
+
+    }
+
+    @Test
+    public void halfRewind135(){
+        for (int i = 0; i <135; i++) {
+            planet1.forward();
+
+        }
+        double pastx1 = planet1.getCoordinate_x();
+        double pasty1 = planet1.getCoordinate_y();
+        double pastAngle = planet1.getAngle();
+
+        planet1.forward();
+        double futureAngle = planet1.getAngle();
+        planet1.rewind(2);
+
+        double midleAngle = planet1.getAngle();
+        planet1.rewind(2);
+
+        Assert.assertTrue(futureAngle-planet1.getAngular_velocity()/2 == midleAngle);
+        Assert.assertTrue(pastAngle==planet1.getAngle());
+
+        Assert.assertTrue(pastx1 == planet1.getCoordinate_x());
+        Assert.assertTrue(pasty1 == planet1.getCoordinate_y());
+    }
+
+    @Test
+    public void QuarterRewind180(){
+        for (int i = 0; i <180; i++) {
+            planet1.forward();
+        }
+        double pastx1 = planet1.getCoordinate_x();
+        double pasty1 = planet1.getCoordinate_y();
+        double pastAngle = planet1.getAngle();
+
+        planet1.forward();
+        double futureAngle = planet1.getAngle();
+        planet1.rewind(4);
+        double q1Angle = planet1.getAngle();
+
+        planet1.rewind(4);
+        double q2Angle = planet1.getAngle();
+
+        planet1.rewind(4);
+        double q3Angle = planet1.getAngle();
+
+        planet1.rewind(4);
 
 
-        Assert.assertTrue(planet3.getCoordinate_x() == x);
-        Assert.assertTrue(planet3.getCoordinate_y() == y);
+        Assert.assertTrue(futureAngle-planet1.getAngular_velocity()/4 == q1Angle);
+        Assert.assertTrue(futureAngle-planet1.getAngular_velocity()/2 == q2Angle);
+        Assert.assertTrue(futureAngle-(3*planet1.getAngular_velocity()/4 )== q3Angle);
 
+        Assert.assertTrue(pastAngle==planet1.getAngle());
+
+        Assert.assertTrue(pastx1 == planet1.getCoordinate_x());
+        Assert.assertTrue(pasty1 == planet1.getCoordinate_y());
     }
 }
