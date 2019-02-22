@@ -10,6 +10,8 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class BasicController {
 
@@ -31,7 +33,9 @@ public class BasicController {
 
     @EventListener(ApplicationReadyEvent.class)
     public void doSomethingAfterStartup() {
-        predictionRepository.saveAll(simulation.simulateDays());
+        List<Prediction> predictions = simulation.simulateDays();
+        predictions.remove(0);
+        predictionRepository.saveAll(predictions);
 
 
     }
