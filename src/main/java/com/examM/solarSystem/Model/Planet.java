@@ -1,8 +1,7 @@
-package com.examM.solarSystem.SolarModel;
+package com.examM.solarSystem.Model;
 
-public class Planet {
+public class Planet extends Point {
 
-    private Point location;
     private double angular_velocity;
     private double distance_sun;
     private double angle;
@@ -13,47 +12,46 @@ public class Planet {
     //de la forma que muestra el examen
     public Planet(String name, double distance_sun,double angular_velocity ) {
 
-        Point location = new Point(distance_sun,0);
-        this.location = location;
-
+        super(distance_sun,0);
         //Alineados con angulo 0
         this.angle = 0;
         this.angular_velocity = angular_velocity;
         this.distance_sun = distance_sun;
-
         this.name = name;
     }
 
-    //Asumimos que todos los planetas estan alineados con el sol
-    //de la forma que muestra el examen
-    public Planet(String name, double distance_sun,double angular_velocity, double angle ) {
-
-        Point location = new Point(distance_sun,0);
-        this.location = location;
-
-        //Alineados con angulo 0
-        this.angle = angle;
-        this.angular_velocity = angular_velocity;
-        this.distance_sun = distance_sun;
-
-        this.name = name;
+    public Planet(Planet planet){
+        this.setCoordinate_x(planet.getCoordinate_x());
+        this.setCoordinate_y(planet.getCoordinate_y());
+        this.angle = planet.getAngle();
+        this.angular_velocity = planet.getAngular_velocity();
+        this.distance_sun = planet.getDistance_sun();
+        this.name = planet.name;
     }
 
-    //Movimiento angular
-    //Redondeado por unidades
-    public void move(){
-        this.angle += angular_velocity;
-        this.location.setCoordinate_x(Math.round(this.location.getCoordinate_x() +distance_sun* Math.cos(Math.toRadians(angle))));
-        this.location.setCoordinate_y(Math.round(this.location.getCoordinate_y() +distance_sun *Math.sin(Math.toRadians(angle))));
+    public void forward(){
+        this.angle+= angular_velocity;
+        if(this.angle<360){
+            this.angle+=360;
+        }
+        if(this.angle >360){
+            this.angle-=360;
+        }
+        move();
     }
 
-    public Point getLocation() {
-        return location;
+    public void rewind(int factor){
+        double factor_angle = this.angular_velocity/factor;
+        this.angle -= factor_angle;
+        move();
     }
 
-    public void setLocation(Point location) {
-        this.location = location;
+    private void move(){
+
+        this.setCoordinate_x(distance_sun * Math.cos(Math.toRadians(angle)));
+        this.setCoordinate_y(distance_sun * Math.sin(Math.toRadians(angle)));
     }
+
 
     public double getAngular_velocity() {
         return angular_velocity;
