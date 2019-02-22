@@ -1,16 +1,13 @@
 package com.examM.solarSystem.Model;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Simulation {
 
     private List<Planet> solar_system = new LinkedList<Planet>();
-    private Map<Long ,PeriodPrediction> days = new HashMap<Long, PeriodPrediction>();
+    private Map<Long , Prediction> days = new HashMap<Long, Prediction>();
 
-    private Map<Long ,PeriodPrediction> weather_in_day = new HashMap<Long, PeriodPrediction>();
+    private Map<Long , Prediction> weather_in_day = new HashMap<Long, Prediction>();
 
     private Map<Long,Observation> observations_by_day = new HashMap<Long,Observation>();
 
@@ -36,11 +33,11 @@ public class Simulation {
         counter_optimal = 0;
 
         observations_by_day.put((long)0,new Observation(solar_system.get(0),solar_system.get(1),solar_system.get(2)));
-        weather_in_day.put((long)0,new PeriodPrediction(0,Weather.SEQUIA));
+        weather_in_day.put((long)0,new Prediction(0,Weather.SEQUIA));
 
     }
 
-    public void simulateDays(){
+    public List<Prediction> simulateDays(){
         for (long i = 1; i <= PREDICTED_DAYS ; i++) {
             Planet p1;
             Planet p2;
@@ -56,6 +53,8 @@ public class Simulation {
 
         }
         predictDays();
+        return new ArrayList<Prediction>(weather_in_day.values());
+
     }
 
     //Primero se trata de predecir de manera discreta
@@ -71,7 +70,7 @@ public class Simulation {
                 rough_prediction(i);
             }
             if(!weather_in_day.containsKey(i)){
-                weather_in_day.put(i,new PeriodPrediction(i, weather_in_day.get(i-1).getDetail()));
+                weather_in_day.put(i,new Prediction(i, weather_in_day.get(i-1).getDetail()));
             }
         }
         day_max_rain_cicle();
@@ -83,7 +82,7 @@ public class Simulation {
 
         if(obs.contains_sun()) {
             counter_rain++;
-            weather_in_day.put(day, new PeriodPrediction(day, Weather.LLUVIA));
+            weather_in_day.put(day, new Prediction(day, Weather.LLUVIA));
             if (obs.perimeter() > perimeterMax) {
                 perimeterMax = obs.perimeter();
                 day_max_rain = day;
@@ -92,11 +91,11 @@ public class Simulation {
         }else if(obs.check_aline()){
             if(obs.alined_with_sun()){
                 counter_drought++;
-                weather_in_day.put(day,new PeriodPrediction(day, Weather.SEQUIA));
+                weather_in_day.put(day,new Prediction(day, Weather.SEQUIA));
                 prediction_found= true;
             }else{
                 counter_optimal++;
-                weather_in_day.put(day,new PeriodPrediction(day,Weather.CONDICIONES_OPTIMAS));
+                weather_in_day.put(day,new Prediction(day,Weather.CONDICIONES_OPTIMAS));
                 prediction_found= true;
             }
         }
@@ -132,10 +131,10 @@ public class Simulation {
                 found_aline = true;
                 if(observation.alined_with_sun()){
                     counter_drought++;
-                    weather_in_day.put(day,new PeriodPrediction(day,Weather.SEQUIA));
+                    weather_in_day.put(day,new Prediction(day,Weather.SEQUIA));
                 }else{
                     counter_optimal++;
-                    weather_in_day.put(day,new PeriodPrediction(day,Weather.CONDICIONES_OPTIMAS));
+                    weather_in_day.put(day,new Prediction(day,Weather.CONDICIONES_OPTIMAS));
                 }
             }
             iterations++;
@@ -148,13 +147,13 @@ public class Simulation {
     //En los distintos ciclos de 360 dias
     private void day_max_rain_cicle(){
         weather_in_day.remove(day_max_rain);
-        weather_in_day.put(day_max_rain,new PeriodPrediction(day_max_rain,Weather.MAXIMO_LLUVIA));
+        weather_in_day.put(day_max_rain,new Prediction(day_max_rain,Weather.MAXIMO_LLUVIA));
 
         long rain_days =day_max_rain;
         while(rain_days<= PREDICTED_DAYS){
             rain_days+=360;
             weather_in_day.remove(rain_days);
-            weather_in_day.put(rain_days,new PeriodPrediction(rain_days,Weather.MAXIMO_LLUVIA));
+            weather_in_day.put(rain_days,new Prediction(rain_days,Weather.MAXIMO_LLUVIA));
 
         }
 
@@ -186,11 +185,11 @@ public class Simulation {
         return counter_optimal;
     }
 
-    public Map<Long, PeriodPrediction> getDays() {
+    public Map<Long, Prediction> getDays() {
         return days;
     }
 
-    public void setDays(Map<Long, PeriodPrediction> days) {
+    public void setDays(Map<Long, Prediction> days) {
         this.days = days;
     }
 
@@ -202,11 +201,11 @@ public class Simulation {
         this.day_max_rain = day_max_rain;
     }
 
-    public Map<Long, PeriodPrediction> getWeather_in_day() {
+    public Map<Long, Prediction> getWeather_in_day() {
         return weather_in_day;
     }
 
-    public void setWeather_in_day(Map<Long, PeriodPrediction> weather_in_day) {
+    public void setWeather_in_day(Map<Long, Prediction> weather_in_day) {
         this.weather_in_day = weather_in_day;
     }
 }
