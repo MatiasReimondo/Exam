@@ -1,17 +1,24 @@
 package com.examM.solarSystem.Controllers;
 
-
-import com.examM.solarSystem.SolarModel.PeriodPrediction;
-import com.examM.solarSystem.SolarModel.ResponsePrediction;
-import com.examM.solarSystem.SolarModel.Simulation;
+import com.examM.solarSystem.Model.Prediction;
+import com.examM.solarSystem.Model.ResponsePrediction;
+import com.examM.solarSystem.Model.Simulation;
+import com.examM.solarSystem.Model.Weather;
+import com.examM.solarSystem.Repository.PredictionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class BasicController {
 
-    public static Simulation simulation = new Simulation();
+    @Autowired
+    private PredictionRepository predictionRepository;
+
+    private static Simulation simulation = new Simulation();
 
     @RequestMapping("/")
     public ResponsePrediction predictioResult(){
@@ -19,14 +26,17 @@ public class BasicController {
     }
 
     @RequestMapping(value ="/clima", method = RequestMethod.GET)
-    public PeriodPrediction prediction(@RequestParam(value="day") long day){
-        return simulation.getDays().get(day);
+    public Prediction prediction(@RequestParam(value="day") long day){
+       if(!predictionRepository.existsById(day)){
+            return new Prediction(day, Weather.NO_PREDECIDO);
+        }
+        return predictionRepository.getOne(day);
 
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void doSomethingAfterStartup() {
-        simulation.simulate_x_days(365);
+        predictionRepository.saveAll(simulation.simulateDays());
 
     }
 }
