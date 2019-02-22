@@ -4,5 +4,5 @@ package com.examM.solarSystem.Model;
 //Cada uno correspondiente a un periodo dado por las diferentes observaciones
 
 public enum Weather {
-    LLUVIA, MAXIMO_LLUVIA, SEQUIA, CONDICIONES_OPTIMAS
+    LLUVIA, MAXIMO_LLUVIA, SEQUIA, CONDICIONES_OPTIMAS,NO_PREDECIDO
 }

@@ -53,7 +53,8 @@ public class Simulation {
 
         }
         predictDays();
-        return new ArrayList<Prediction>(weather_in_day.values());
+        //Removemos el dia 0 de la prediccion
+        return new ArrayList<Prediction>(weather_in_day.values()).subList(1,PREDICTED_DAYS);
 
     }
 
