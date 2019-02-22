@@ -24,7 +24,7 @@ public class ObservationTest {
     @Test
     public void planetsAlinedWithSun(){
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
@@ -37,7 +37,7 @@ public class ObservationTest {
         }
         Observation obs = new Observation(planet1,planet2,planet3);
         Assert.assertTrue(obs.check_aline());
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ObservationTest {
         }
         Observation obs = new Observation(planet1,planet2,planet3);
         Assert.assertTrue(obs.check_aline());
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ObservationTest {
         }
         Observation obs = new Observation(planet1,planet2,planet3);
         Assert.assertTrue(obs.check_aline());
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
@@ -156,14 +156,14 @@ public class ObservationTest {
     @Test
     public void alinedAllRight (){
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
     public void alinedTwoRightOneLeft(){
         planet1.setCoordinate_x(-500);
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
@@ -171,7 +171,7 @@ public class ObservationTest {
         planet1.setCoordinate_x(-500);
         planet2.setCoordinate_x(-1000);
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
@@ -180,7 +180,7 @@ public class ObservationTest {
         planet2.setCoordinate_x(-1000);
         planet3.setCoordinate_x(-2000);
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
@@ -188,7 +188,7 @@ public class ObservationTest {
         planet2.setCoordinate_x(-1000);
         planet3.setCoordinate_x(-2000);
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
@@ -196,21 +196,21 @@ public class ObservationTest {
         planet1.setCoordinate_x(-500);
         planet3.setCoordinate_x(-2000);
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
     public void alinedP3RightP1P2Left (){
         planet3.setCoordinate_x(-2000);
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
     @Test
     public void alinedP2LeftP1P3Right (){
         planet2.setCoordinate_x(-1000);
         Observation obs = new Observation(planet1,planet2,planet3);
-        Assert.assertTrue(obs.alined_with_sun(1));
+        Assert.assertTrue(obs.alined_with_sun());
     }
 
 

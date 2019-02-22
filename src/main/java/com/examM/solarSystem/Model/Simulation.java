@@ -10,11 +10,9 @@ public class Simulation {
     private List<Planet> solar_system = new LinkedList<Planet>();
     private Map<Long ,PeriodPrediction> days = new HashMap<Long, PeriodPrediction>();
 
-    private Map<Long ,PeriodPrediction> days_in_cicle = new HashMap<Long, PeriodPrediction>();
+    private Map<Long ,PeriodPrediction> weather_in_day = new HashMap<Long, PeriodPrediction>();
 
-    private Map<Long,Observation> cicle = new HashMap<Long,Observation>();
-
-
+    private Map<Long,Observation> observations_by_day = new HashMap<Long,Observation>();
 
     private Integer counter_rain;
     private Integer counter_drought;
@@ -22,10 +20,12 @@ public class Simulation {
     private long day_max_rain;
     private double perimeterMax = 0;
 
-    private static double ERROR_DISTANCE =10;
     private static int FACTOR = 16;
+    private static int PREDICTED_DAYS = 3650;
 
 
+    //Empezamos la simulacion con todos los planetas alineados
+    //Cargamos el estado inicial del sistema
     public Simulation(){
         solar_system.add(new Planet("Ferengi",500,-1));
         solar_system.add(new Planet("Vulcano",1000,5));
@@ -35,14 +35,13 @@ public class Simulation {
         counter_drought = 0;
         counter_optimal = 0;
 
-        cicle.put((long)0,new Observation(solar_system.get(0),solar_system.get(1),solar_system.get(2)));
-        days_in_cicle.put((long)0,new PeriodPrediction(0,Period.DROUGHT));
+        observations_by_day.put((long)0,new Observation(solar_system.get(0),solar_system.get(1),solar_system.get(2)));
+        weather_in_day.put((long)0,new PeriodPrediction(0,Weather.SEQUIA));
 
     }
 
-    public void simulateCicle(){
-
-        for (long i = 1; i <=360 ; i++) {
+    public void simulateDays(){
+        for (long i = 1; i <= PREDICTED_DAYS ; i++) {
             Planet p1;
             Planet p2;
             Planet p3;
@@ -53,54 +52,63 @@ public class Simulation {
             p2 = new Planet(solar_system.get(1));
             p3 = new Planet(solar_system.get(2));
 
-            cicle.put(i,new Observation(p1,p2,p3));
+            observations_by_day.put(i,new Observation(p1,p2,p3));
 
         }
-        predictCicle();
+        predictDays();
     }
 
-    public void predictCicle(){
-        for (long i = 1; i <=360 ; i++) {
+    //Primero se trata de predecir de manera discreta
+    //Se examina "La foto" de la observacion
+    //Sino se encuentra ningun patron se pasa a la prediccion
+    //aproximada. Esta ultima si los planetas se han cruzado
+    //tratara de "rebobinar los planetas" hasta acercarse al cruce
+    // y luego,tomando en cuenta un error,asignara si en la alineacion estaba o no
+    //incluido el sol
+    public void predictDays(){
+        for (long i = 1; i <= PREDICTED_DAYS ; i++) {
             if(!discreet_prediction(i)){
-                approximate_prediction(i);
+                rough_prediction(i);
             }
-            if(!days_in_cicle.containsKey(i)){
-                days_in_cicle.put(i,new PeriodPrediction(i,days_in_cicle.get(i-1).getDetail()));
+            if(!weather_in_day.containsKey(i)){
+                weather_in_day.put(i,new PeriodPrediction(i, weather_in_day.get(i-1).getDetail()));
             }
         }
         day_max_rain_cicle();
     }
 
     private boolean discreet_prediction(long day){
-        Observation obs = cicle.get(day);
+        Observation obs = observations_by_day.get(day);
         boolean prediction_found = false;
 
         if(obs.contains_sun()) {
             counter_rain++;
-            days_in_cicle.put(day, new PeriodPrediction(day, Period.RAIN));
+            weather_in_day.put(day, new PeriodPrediction(day, Weather.LLUVIA));
             if (obs.perimeter() > perimeterMax) {
                 perimeterMax = obs.perimeter();
                 day_max_rain = day;
             }
             prediction_found= true;
         }else if(obs.check_aline()){
-            if(obs.alined_with_sun(ERROR_DISTANCE)){
+            if(obs.alined_with_sun()){
                 counter_drought++;
-                days_in_cicle.put(day,new PeriodPrediction(day,Period.DROUGHT));
+                weather_in_day.put(day,new PeriodPrediction(day, Weather.SEQUIA));
                 prediction_found= true;
             }else{
                 counter_optimal++;
-                days_in_cicle.put(day,new PeriodPrediction(day,Period.OPTIMAL));
+                weather_in_day.put(day,new PeriodPrediction(day,Weather.CONDICIONES_OPTIMAS));
                 prediction_found= true;
             }
         }
         return prediction_found;
     }
 
-    private void approximate_prediction(long day){
-        Observation obs_past = cicle.get((day-1));
-        Observation obs = cicle.get(day);
-        if(obs_past.angleBetweenSegments()!= 180 && obs_past.angleBetweenSegments() != -180 && obs_past.angleBetweenSegments() != 0){
+    private void rough_prediction(long day){
+        Observation obs_past = observations_by_day.get((day-1));
+        Observation obs = observations_by_day.get(day);
+        if(obs_past.angleBetweenSegments()!= 180 &&
+                obs_past.angleBetweenSegments() != -180 &&
+                obs_past.angleBetweenSegments() != 0){
             if(changeSign(obs,obs_past)){
                 alined_during_day(obs,day);
             }
@@ -122,21 +130,35 @@ public class Simulation {
 
             if(observation.check_aline()){
                 found_aline = true;
-                if(observation.alined_with_sun(ERROR_DISTANCE)){
+                if(observation.alined_with_sun()){
                     counter_drought++;
-                    days_in_cicle.put(day,new PeriodPrediction(day,Period.DROUGHT));
+                    weather_in_day.put(day,new PeriodPrediction(day,Weather.SEQUIA));
                 }else{
                     counter_optimal++;
-                    days_in_cicle.put(day,new PeriodPrediction(day,Period.OPTIMAL));
+                    weather_in_day.put(day,new PeriodPrediction(day,Weather.CONDICIONES_OPTIMAS));
                 }
             }
             iterations++;
         }
     }
 
+    //El modelo repite su comportamiento cada 360 dias
+    //Solo se detecta el primer dia con maxima lluvia
+    //Este metodo coloca los distintos dias con un maximo de lluvia
+    //En los distintos ciclos de 360 dias
     private void day_max_rain_cicle(){
-        days_in_cicle.remove(day_max_rain);
-        days_in_cicle.put(day_max_rain,new PeriodPrediction(day_max_rain,Period.RAIN_MAX));
+        weather_in_day.remove(day_max_rain);
+        weather_in_day.put(day_max_rain,new PeriodPrediction(day_max_rain,Weather.MAXIMO_LLUVIA));
+
+        long rain_days =day_max_rain;
+        while(rain_days<= PREDICTED_DAYS){
+            rain_days+=360;
+            weather_in_day.remove(rain_days);
+            weather_in_day.put(rain_days,new PeriodPrediction(rain_days,Weather.MAXIMO_LLUVIA));
+
+        }
+
+
     }
 
     private boolean changeSign(Observation obs1, Observation obs2){
@@ -180,11 +202,11 @@ public class Simulation {
         this.day_max_rain = day_max_rain;
     }
 
-    public Map<Long, PeriodPrediction> getDays_in_cicle() {
-        return days_in_cicle;
+    public Map<Long, PeriodPrediction> getWeather_in_day() {
+        return weather_in_day;
     }
 
-    public void setDays_in_cicle(Map<Long, PeriodPrediction> days_in_cicle) {
-        this.days_in_cicle = days_in_cicle;
+    public void setWeather_in_day(Map<Long, PeriodPrediction> weather_in_day) {
+        this.weather_in_day = weather_in_day;
     }
 }

@@ -20,13 +20,13 @@ public class BasicController {
 
     @RequestMapping(value ="/clima", method = RequestMethod.GET)
     public PeriodPrediction prediction(@RequestParam(value="day") long day){
-        return simulation.getDays_in_cicle().get(day%360);
+        return simulation.getWeather_in_day().get(day);
 
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void doSomethingAfterStartup() {
-        simulation.simulateCicle();
+        simulation.simulateDays();
 
     }
 }

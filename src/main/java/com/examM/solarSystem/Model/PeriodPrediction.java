@@ -3,9 +3,9 @@ package com.examM.solarSystem.Model;
 public class PeriodPrediction {
 
     private final long day;
-    private final Period detail;
+    private final Weather detail;
 
-    public PeriodPrediction(long day, Period detail){
+    public PeriodPrediction(long day, Weather detail){
         this.day= day;
         this.detail = detail;
     }
@@ -14,7 +14,7 @@ public class PeriodPrediction {
         return day;
     }
 
-    public Period getDetail() {
+    public Weather getDetail() {
         return detail;
     }
 
