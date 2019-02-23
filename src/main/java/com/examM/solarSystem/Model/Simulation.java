@@ -2,10 +2,13 @@ package com.examM.solarSystem.Model;
 
 import java.util.*;
 
+/**
+ * Clase encargada de generar la simulacion
+ * Generando la distintas predicciones de cada dia
+ */
 public class Simulation {
 
     private List<Planet> solar_system = new LinkedList<Planet>();
-    private Map<Long , Prediction> days = new HashMap<Long, Prediction>();
 
     private Map<Long , Prediction> weather_in_day = new HashMap<Long, Prediction>();
 
@@ -21,8 +24,11 @@ public class Simulation {
     private static int PREDICTED_DAYS = 3650;
 
 
-    //Empezamos la simulacion con todos los planetas alineados
-    //Cargamos el estado inicial del sistema
+    /**
+     * Constructor de la simulacion
+     * Empezamos la simulacion con todos los planetas alineados
+     * Cargamos el estado inicial del sistema
+     */
     public Simulation(){
         solar_system.add(new Planet("Ferengi",500,-1));
         solar_system.add(new Planet("Vulcano",1000,5));
@@ -37,6 +43,11 @@ public class Simulation {
 
     }
 
+    /**
+     * Simula los 10 anios del sistema solar
+     * y genera las predicciones para cada dia
+     * @return lista de predicciones de cada dia
+     */
     public List<Prediction> simulateDays(){
         for (long i = 1; i <= PREDICTED_DAYS ; i++) {
             Planet p1;
@@ -58,13 +69,12 @@ public class Simulation {
 
     }
 
-    //Primero se trata de predecir de manera discreta
-    //Se examina "La foto" de la observacion
-    //Sino se encuentra ningun patron se pasa a la prediccion
-    //aproximada. Esta ultima, si los planetas se han cruzado
-    //tratara de "rebobinar los planetas" hasta acercarse al cruce
-    // y luego,tomando en cuenta un error,asignara si en la alineacion estaba o no
-    //incluido el sol
+    /**
+     * Metodo encargado de generar la prediccion por dia
+     * Primero se trata de predecir de manera discreta
+     * Sino se encuentra ningun patron se pasa a la prediccion aproximada.
+     * Si en ninguno de los metodos se encuentra algun patron se setea el clima del dia anterior
+     */
     public void predictDays(){
         for (long i = 1; i <= PREDICTED_DAYS ; i++) {
             if(!discreet_prediction(i)){
@@ -75,6 +85,12 @@ public class Simulation {
         }
     }
 
+    /**
+     * Metodo que realiza la prediccion del dia examinando
+     * "la foto" de la observacion
+     * @param day
+     * @return True = Se encontro un patron en la observacion
+     */
     private boolean discreet_prediction(long day){
         Observation obs = observations_by_day.get(day);
         boolean prediction_found = false;
@@ -97,6 +113,11 @@ public class Simulation {
         return prediction_found;
     }
 
+    /**
+     * Metodo que trata de determinar a traves de aproximaciones
+     * que patron se presento durante el dia
+     * @param day
+     */
     private void rough_prediction(long day){
         Observation obs_past = observations_by_day.get((day-1));
         Observation obs = observations_by_day.get(day);
@@ -109,7 +130,13 @@ public class Simulation {
         }
     }
 
-    public void rain_history(Observation obs,long day){
+    /**
+     * Metodo que analiza el periodo de lluvia y cuando se presenta
+     * el maximo del mismo
+     * @param obs
+     * @param day
+     */
+    private void rain_history(Observation obs,long day){
         if(weather_in_day.get(day-1).getDetail()!= Weather.LLUVIA){
             counter_rain++;
         }
@@ -119,6 +146,12 @@ public class Simulation {
         }
     }
 
+    /**
+     * Metodo que analiza si los planetas se han alineado durante el dia
+     * y si lo hicieron o no con el sol
+     * @param obs Observacion del dia
+     * @param day
+     */
     private void alined_during_day(Observation obs,long day){
         boolean found_aline = false;
         int iterations = 0;
@@ -142,8 +175,13 @@ public class Simulation {
         }
     }
 
+    /**
+     * Metodo que en el final de un periodo de lluvia
+     * Setea el maximo de lluvia dentro de un periodo
+     * @param day
+     */
     //Si hubo un cambio de lluvia a otro clima
-    //Setea el di con mas lluvia en el periodo
+    //Setea el dia con mas lluvia en el periodo
     private void max_rain_period(long day){
         if((weather_in_day.get(day).getDetail()!=Weather.LLUVIA) &&
                 (weather_in_day.get(day-1).getDetail() == Weather.LLUVIA)){
@@ -153,10 +191,23 @@ public class Simulation {
         }
     }
 
+    /**
+     * Metodo que informa si cambio el signo del angulo entre los planetas de dos
+     * observaciones distintas
+     * @param obs1
+     * @param obs2
+     * @returns True = el signo del angulo ha cambiado
+     */
     private boolean changeSign(Observation obs1, Observation obs2){
         return (Math.signum(obs1.angleBetweenSegments()) != Math.signum(obs2.angleBetweenSegments()));
     }
 
+    /**
+     * Si no se encontro ningun patron en ninguno de los analisis
+     * setea el clima del dia con el clima del dia anterior
+     * ya que el periodo continua
+     * @param day
+     */
     private void continue_period(long day){
         if(!weather_in_day.containsKey(day)){
             weather_in_day.put(day,new Prediction(day, weather_in_day.get(day-1).getDetail()));
@@ -182,14 +233,6 @@ public class Simulation {
 
     public Integer getCounter_optimal() {
         return counter_optimal;
-    }
-
-    public Map<Long, Prediction> getDays() {
-        return days;
-    }
-
-    public void setDays(Map<Long, Prediction> days) {
-        this.days = days;
     }
 
     public long getDay_max_rain() {
