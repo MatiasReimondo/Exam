@@ -61,7 +61,7 @@ public class Simulation {
     //Primero se trata de predecir de manera discreta
     //Se examina "La foto" de la observacion
     //Sino se encuentra ningun patron se pasa a la prediccion
-    //aproximada. Esta ultima si los planetas se han cruzado
+    //aproximada. Esta ultima, si los planetas se han cruzado
     //tratara de "rebobinar los planetas" hasta acercarse al cruce
     // y luego,tomando en cuenta un error,asignara si en la alineacion estaba o no
     //incluido el sol
@@ -70,11 +70,9 @@ public class Simulation {
             if(!discreet_prediction(i)){
                 rough_prediction(i);
             }
-            if(!weather_in_day.containsKey(i)){
-                weather_in_day.put(i,new Prediction(i, weather_in_day.get(i-1).getDetail()));
-            }
+            continue_period(i);
+            max_rain_period(i);
         }
-        day_max_rain_cicle();
     }
 
     private boolean discreet_prediction(long day){
@@ -82,12 +80,8 @@ public class Simulation {
         boolean prediction_found = false;
 
         if(obs.contains_sun()) {
-            counter_rain++;
             weather_in_day.put(day, new Prediction(day, Weather.LLUVIA));
-            if (obs.perimeter() > perimeterMax) {
-                perimeterMax = obs.perimeter();
-                day_max_rain = day;
-            }
+            rain_history(obs,day);
             prediction_found= true;
         }else if(obs.check_aline()){
             if(obs.alined_with_sun()){
@@ -115,6 +109,15 @@ public class Simulation {
         }
     }
 
+    public void rain_history(Observation obs,long day){
+        if(weather_in_day.get(day-1).getDetail()!= Weather.LLUVIA){
+            counter_rain++;
+        }
+        if (obs.perimeter() > perimeterMax) {
+            perimeterMax = obs.perimeter();
+            day_max_rain = day;
+        }
+    }
 
     private void alined_during_day(Observation obs,long day){
         boolean found_aline = false;
@@ -123,10 +126,7 @@ public class Simulation {
         Observation observation = new Observation(obs);
 
         while(!found_aline && iterations<FACTOR ){
-
-            observation.getP1().rewind(FACTOR);
-            observation.getP2().rewind(FACTOR);
-            observation.getP3().rewind(FACTOR);
+            observation.rewind_planets(FACTOR);
 
             if(observation.check_aline()){
                 found_aline = true;
@@ -142,27 +142,25 @@ public class Simulation {
         }
     }
 
-    //El modelo repite su comportamiento cada 360 dias
-    //Solo se detecta el primer dia con maxima lluvia
-    //Este metodo coloca los distintos dias con un maximo de lluvia
-    //En los distintos ciclos de 360 dias
-    private void day_max_rain_cicle(){
-        weather_in_day.remove(day_max_rain);
-        weather_in_day.put(day_max_rain,new Prediction(day_max_rain,Weather.MAXIMO_LLUVIA));
-
-        long rain_days =day_max_rain;
-        while(rain_days<= PREDICTED_DAYS){
-            rain_days+=360;
-            weather_in_day.remove(rain_days);
-            weather_in_day.put(rain_days,new Prediction(rain_days,Weather.MAXIMO_LLUVIA));
-
+    //Si hubo un cambio de lluvia a otro clima
+    //Setea el di con mas lluvia en el periodo
+    private void max_rain_period(long day){
+        if((weather_in_day.get(day).getDetail()!=Weather.LLUVIA) &&
+                (weather_in_day.get(day-1).getDetail() == Weather.LLUVIA)){
+            weather_in_day.remove(day_max_rain);
+            weather_in_day.put(day_max_rain,new Prediction(day_max_rain,Weather.MAXIMO_LLUVIA));
+            perimeterMax = 0;
         }
-
-
     }
 
     private boolean changeSign(Observation obs1, Observation obs2){
         return (Math.signum(obs1.angleBetweenSegments()) != Math.signum(obs2.angleBetweenSegments()));
+    }
+
+    private void continue_period(long day){
+        if(!weather_in_day.containsKey(day)){
+            weather_in_day.put(day,new Prediction(day, weather_in_day.get(day-1).getDetail()));
+        }
     }
 
 

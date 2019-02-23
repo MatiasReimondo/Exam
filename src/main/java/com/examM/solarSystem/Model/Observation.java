@@ -120,6 +120,12 @@ public class Observation {
         return (aline_0 || aline_pi);
     }
 
+    public void rewind_planets(int factor){
+        this.p1.rewind(factor);
+        this.p2.rewind(factor);
+        this.p3.rewind(factor);
+    }
+
     public Planet getP1() {
         return p1;
     }
