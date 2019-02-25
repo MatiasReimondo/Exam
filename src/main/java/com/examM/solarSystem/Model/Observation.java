@@ -2,6 +2,10 @@ package com.examM.solarSystem.Model;
 
 import java.awt.*;
 
+/**
+Clase encargada de la logica de deteccion de los distintos patrones del clima
+"Foto" en un determinado momento del sistema solar
+ */
 public class Observation {
 
     private Planet p1;
@@ -15,13 +19,22 @@ public class Observation {
     private static double ANGLE_ALINE_ZERO = 0;
     private static double ANGLE_ALINE_PI = 180;
 
-
+    /**
+    Constructor por defecto
+    @param p1 Planeta mas cercano al sol (Ferengi)
+    @param p2 Planeta entre el planeta mas cercano y el mas lejano (Vulcano)
+    @param p3 Planeta mas lejano al sol (Betasoide)
+    */
     public Observation(Planet p1, Planet p2, Planet p3) {
         this.p1 = p1;
         this.p2 = p2;
         this.p3 = p3;
     }
 
+    /**
+     * Constructor por copia
+     * @param observation
+     */
     public Observation (Observation observation){
 
         this.p1 = new Planet(observation.getP1());
@@ -29,11 +42,14 @@ public class Observation {
         this.p3 = new Planet(observation.getP3());
     }
 
-    //Se comprueba la alineacion con el sol
-    //comprobando que el sol sea colineal con alguno de los 3 planetas
-    //Si el sol es colineal por ejemplo con el planeta 1 y 2
-    //DsolP1 + DP1P2 = DsolP2
-    //Se toma un error de tolerancia
+    /**
+     *  Se comprueba la alineacion con el sol
+     *  comprobando que el sol sea colineal con alguno de los 3 planetas
+     *  Si el sol es colineal por ejemplo con el planeta 1 y 2
+     *  DsolP1 + DP1P2 = DsolP2
+     *  Se toma un error de tolerancia
+     *  @return True=Alined
+     */
     public boolean alined_with_sun(){
 
         double dst_sun_p1 = distance(sun,p1);
@@ -55,6 +71,10 @@ public class Observation {
         }
     }
 
+    /**
+     * Calculo del perimetro del triangulo formado por los tres puntos
+     * @return perimetro
+     */
     public double perimeter(){
 
         double distance1 = distance(p1,p2);
@@ -66,7 +86,12 @@ public class Observation {
         return perimeter;
     }
 
-    //Distancia entre dos puntos
+    /**
+     * Distancia entre dos puntos
+     * @param p1 punto 1
+     * @param p2 punto 2
+     * @return distancia entre puntos
+     */
     private double distance(Point p1, Point p2){
 
         double distance = (Math.sqrt(Math.pow(p1.getCoordinate_x()-p2.getCoordinate_x(),2)
@@ -74,9 +99,12 @@ public class Observation {
         return distance;
     }
 
-    //Creamos un poligono y usamos el metodo para ver si contiene el sol
-    //Se pierde precision ya que el metodo soporta solamene enteros
-    //Futura mejora
+    /**
+     * Creamos un poligono,usamos contains() para comprobar si contiene al sol
+     * Se pierde precision ya que el metodo soporta solamente enteros
+     * Futura mejora
+     * @return True = El triangulo contiene al sol
+     */
     public boolean contains_sun (){
         Polygon triangle = new Polygon();
         triangle.addPoint((int)p1.getCoordinate_x(),(int)p1.getCoordinate_y());
@@ -86,9 +114,11 @@ public class Observation {
         return triangle.contains(sun.getCoordinate_x(),sun.getCoordinate_y());
     }
 
-    //Tomamos como segmento P2->P1 (V->F)
-    //Y P2->P3 (V->B)
-    //Valor del angulo entre -180 a 180
+    /**
+     *  Tomamos como segmento P2->P1 (V->F)
+     *  Y P2->P3 (V->B)
+     * @return Valor del angulo entre -180 a 180
+     */
     public double angleBetweenSegments(){
 
         Point pi = new Point(p1.getCoordinate_x()-p2.getCoordinate_x(),p1.getCoordinate_y()-p2.getCoordinate_y());
@@ -108,9 +138,13 @@ public class Observation {
         return angle;
     }
 
-    //La alineacion se da cuando el valor absoluto del angulo
-    // es cercano a 180 o a 0
-    //Se toma un error de tolerancia
+    /**
+     * Comprueba alineacion entre planetas
+     * La alineacion se da cuando el valor absoluto del angulo
+     * es cercano a 180 o a 0
+     * Se toma un error de tolerancia
+     * @return True = Planetas alineados
+     */
     public boolean check_aline(){
         double abs_angle = Math.abs(this.angleBetweenSegments());
 
@@ -118,6 +152,17 @@ public class Observation {
         boolean aline_pi = (ANGLE_ALINE_PI-ERROR_ANGLE < abs_angle) ;
 
         return (aline_0 || aline_pi);
+    }
+
+    /**
+     * Vuelve para atras el movimiento de los planetas
+     * Desplazandolos -Velocidad_angular/FACTOR
+     * @param factor
+     */
+    public void rewind_planets(int factor){
+        this.p1.rewind(factor);
+        this.p2.rewind(factor);
+        this.p3.rewind(factor);
     }
 
     public Planet getP1() {

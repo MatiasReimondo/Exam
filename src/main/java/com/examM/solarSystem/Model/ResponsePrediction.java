@@ -1,5 +1,9 @@
 package com.examM.solarSystem.Model;
 
+/**
+ * Clase encargada de formar el mensaje inicial de la aplicacion
+ * que informa los resultados de la prediccion
+ */
 public class ResponsePrediction {
 
     private final String message1;
