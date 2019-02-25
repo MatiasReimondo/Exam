@@ -1,5 +1,8 @@
 package com.examM.solarSystem.Model;
 
+/**
+Clase que modela un punto en el espacio con su par de coordenadas (X,Y)
+ */
 public class Point {
     private double coordinate_x;
     private double coordinate_y;
@@ -27,9 +30,7 @@ public class Point {
         this.coordinate_x = coordinate_x;
     }
 
-    public double getCoordinate_y() {
-        return coordinate_y;
-    }
+    public double getCoordinate_y() { return coordinate_y; }
 
     public void setCoordinate_y(double coordinate_y) {
         this.coordinate_y = coordinate_y;
