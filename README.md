@@ -14,5 +14,8 @@ Maven 3.5
 2.0.0 Se corrigen errores en el modelo de prediccion
       Integracion con la base de datos de Heroku
 
+2.0.5 Entrega final del examen
+      Se refactorizaron algunas partes del codigo y se agregaron comentarios en Javadocs de los metodos del modelo
+
 ## Url
 https://exam-solar-system.herokuapp.com/
